@@ -35,12 +35,12 @@ struct HEIFParser: ParsableCommand {
         help: ArgumentHelp("Use 10 bit color depth in destination")
     )
     var heif10: Bool = false
-
-    @Argument(help: ArgumentHelp("Source files"))
-    var sourceFiles: Array<String>
     
     @Flag(help: ArgumentHelp("Trash source file"))
     var trashSource: Bool = false
+
+    @Argument(help: ArgumentHelp("Source files"))
+    var sourceFiles: Array<String>
     
     func validate() throws {
         guard quality >= 0.1 && quality <= 1.0 else {
