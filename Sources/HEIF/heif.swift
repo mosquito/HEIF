@@ -101,9 +101,6 @@ struct HEIFParser: ParsableCommand {
                 }
                 
                 copyCreationDate(from: path, to: heicUrl.path)
-                if trashSource {
-                    try! fileManager.trashItem(at: imageUrl, resultingItemURL: nil)
-                }
             }
             catch {
                 print("*************************************************")
@@ -111,6 +108,12 @@ struct HEIFParser: ParsableCommand {
                 print(error);
                 print("*************************************************")
                 print("")
+                dispatchSemaphore.signal()
+                return
+            }
+            
+            if trashSource {
+                try! fileManager.trashItem(at: imageUrl, resultingItemURL: nil)
             }
             dispatchSemaphore.signal()
         })
