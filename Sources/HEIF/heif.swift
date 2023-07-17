@@ -10,8 +10,10 @@ import os
 
 import Darwin
 
+import IOKit
+import IOKit.pwr_mgt
 
-let kToolVersion = "0.8"
+let kToolVersion = "0.9"
 let defaultCompressionQuality = 0.76
 
 let dispatcher = DispatchQueue(label: "heif.converter")
@@ -122,6 +124,16 @@ struct HEIFParser: ParsableCommand {
     func run() {
         let dispatchGroup = DispatchGroup()
 
+        let reasonForActivity = "HEIF compression" as CFString
+        var assertionID: IOPMAssertionID = 0
+        var success = IOPMAssertionCreateWithName(
+            kIOPMAssertionTypeNoIdleSleep as CFString,
+            IOPMAssertionLevel(kIOPMAssertionLevelOn),
+            reasonForActivity,
+            &assertionID
+        )
+        if success != kIOReturnSuccess {print("Failed to prevent sleep")}
+
         for source in sourceFiles {
             for path in Progress(Glob(pattern: source)) {
                 dispatchSemaphore.wait()
@@ -129,5 +141,7 @@ struct HEIFParser: ParsableCommand {
             }
         }
         dispatchGroup.wait()
+        
+        if success == kIOReturnSuccess {success = IOPMAssertionRelease(assertionID)}
     }
 }
